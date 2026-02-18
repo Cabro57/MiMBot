@@ -1,35 +1,38 @@
-# config.py
-
 class Config:
     # --- Telegram Bilgileri ---
     # Botun sinyal ve bildirim göndereceği adresler
     BOT_TOKEN = '8143998160:AAHbCy0zE6IrwsFlJ4LwTo6ulsPUkRPyDAw'
     CHAT_ID = '-1002547240908'
 
-    # --- Otomatik Parite Ayarları ---
-    # Boş bırakıldığında bot tüm Binance Futures USDT paritelerini (250+) tarar.
-    SYMBOLS = [] 
+    # --- Market Tarama Filtreleri ---
+    # Bot, 24 saatlik hacme göre ilk kaç coini tarasın?
+    TOP_VOLUME_LIMIT = 100 
+    # Market listesi kaç saatte bir güncellensin? (Yenilenen hacim şampiyonları için)
+    MARKET_REFRESH_HOURS = 1 
 
     # --- Zamanlama Ayarları ---
-    # Bot her 15 dakikanın katında (00, 15, 30, 45) otomatik senkronize olur.
-    SCAN_INTERVAL_MINUTES = 15 
+    # Bot kaç dakikada bir tarama yapsın? (Scalping için 1 veya 5 önerilir)
+    SCAN_INTERVAL_MINUTES = 5 
+    # Açık işlemleri (TP/SL) kontrol etme sıklığı (Saniye)
+    TRADE_CONTROL_SECONDS = 10 
     
-    # Açık işlemleri (TP/SL) kontrol etme sıklığı (Saniye).
-    TRADE_CONTROL_SECONDS = 30 
+    # --- Strateji Parametreleri (EMA & Hacim) ---
+    EMA_FAST = 9              # Hızlı hareketli ortalama
+    EMA_SLOW = 21             # Yavaş hareketli ortalama
+    # Hacim Patlaması Çarpanı: Son 1dk hacmi, son 10dk ortalamasının kaç katı olmalı?
+    VOLUME_SPIKE_MULTIPLIER = 1     # Alt sınırımız
+    MAX_VOLUME_SPIKE_LIMIT = 20      # YENİ: Üst sınırımız (Bunu config'e ekle)
+    BREAKOUT_RANGE_PERIOD = 5 
+
+    # --- Risk ve Strateji Ayarları (TP/SL) ---
+    RR_RATIO = 1.4            # 1:1.4 Risk/Ödül oranı (Hedef = Risk x 1.4)
+    MAX_STOP_PERCENT = 0.025   # %2 Maksimum Stop Loss sınırı (Fiyat çok uçarsa kasayı korur)
+    STOP_OFFSET = 0.0005      # Teknik stop seviyesine (r_high/low) eklenen esneme payı
     
-    # --- Risk ve Strateji Ayarları ---
-    RR_RATIO = 1.4             # 1:1.4 Risk/Ödül oranı (Hedef = Stop x 1.4)
-    MAX_STOP_PERCENT = 0.02    # %2 Maksimum Stop Loss sınırı (Kasa koruması için zorunlu)
-    STOP_OFFSET = 0.0005       # Teknik stop seviyesine eklenen küçük esneme payı
-    
-    # --- v3.1 Akıllı Zaman Stopu Ayarları ---
+    # --- Akıllı Zaman Stopu ---
     # İşlem bu saatten uzun sürerse ve kârda ise otomatik kapatılır.
     TIME_STOP_HOURS = 4        
     
-    # --- Teknik Filtre Ayarları ---
-    # Trend yönünü belirleyen ana hareketli ortalama periyodu.
-    EMA_TREND_PERIOD = 200     
-    BREAKOUT_TIMEFRAME = '1m'  # Kırılım onayı için kullanılan alt zaman dilimi
-    
-    # --- Log Ayarları ---
-    ENABLE_CONSOLE_LOG = True  # Terminal ekranında detaylı bilgi akışını gösterir
+    # --- Sistem ve Log Ayarları ---
+    MAX_PARALLEL_TASKS = 15   # Aynı anda analiz edilecek sembol sayısı (Semaphore)
+    ENABLE_CONSOLE_LOG = True # Terminalde tarama detaylarını gösterir
