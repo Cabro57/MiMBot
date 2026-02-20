@@ -18,11 +18,11 @@ from typing import TYPE_CHECKING
 import websockets
 from websockets.exceptions import ConnectionClosed
 
-from trading_bot.core.logger import get_logger
+from core.logger import get_logger
 
 if TYPE_CHECKING:
-    from trading_bot.core.config import TradingConfig
-    from trading_bot.data.memory_store import MemoryStore
+    from core.config import TradingConfig
+    from data.memory_store import MemoryStore
 
 logger = get_logger(__name__)
 

@@ -14,12 +14,12 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from trading_bot.core.logger import get_logger
-from trading_bot.strategies.base_strategy import BaseStrategy, Signal
+from core.logger import get_logger
+from strategies.base_strategy import BaseStrategy, Signal
 
 if TYPE_CHECKING:
-    from trading_bot.core.config import TradingConfig
-    from trading_bot.data.memory_store import MemoryStore
+    from core.config import TradingConfig
+    from data.memory_store import MemoryStore
 
 logger = get_logger(__name__)
 

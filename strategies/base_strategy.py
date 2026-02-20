@@ -12,8 +12,8 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from trading_bot.core.config import TradingConfig
-    from trading_bot.data.memory_store import MemoryStore
+    from core.config import TradingConfig
+    from data.memory_store import MemoryStore
 
 
 @dataclass(frozen=True)

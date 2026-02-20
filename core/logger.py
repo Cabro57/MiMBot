@@ -61,7 +61,7 @@ def get_logger(name: str) -> structlog.stdlib.BoundLogger:
     Modül bazlı logger üretir.
 
     Kullanım:
-        from trading_bot.core.logger import get_logger
+        from core.logger import get_logger
         logger = get_logger(__name__)
         logger.info("mesaj", extra_key="değer")
     """

@@ -25,14 +25,14 @@ from datetime import datetime, timezone
 
 import aiohttp
 
-from trading_bot.core.config import TradingConfig
-from trading_bot.core.database import close_db, init_db
-from trading_bot.core.logger import get_logger, setup_logging
-from trading_bot.data.memory_store import MemoryStore
-from trading_bot.data.websocket_client import BinanceWebSocketClient
-from trading_bot.execution.position_watcher import PositionWatcher
-from trading_bot.execution.signal_dispatcher import SignalDispatcher
-from trading_bot.strategies.ema_volume_strategy import EmaVolumeStrategy
+from core.config import TradingConfig
+from core.database import close_db, init_db
+from core.logger import get_logger, setup_logging
+from data.memory_store import MemoryStore
+from data.websocket_client import BinanceWebSocketClient
+from execution.position_watcher import PositionWatcher
+from execution.signal_dispatcher import SignalDispatcher
+from strategies.ema_volume_strategy import EmaVolumeStrategy
 
 logger = get_logger(__name__)
 

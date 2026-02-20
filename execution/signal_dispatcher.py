@@ -16,14 +16,14 @@ from typing import TYPE_CHECKING
 from telegram import Bot
 from telegram.constants import ParseMode
 
-from trading_bot.core.database import get_session
-from trading_bot.core.logger import get_logger
-from trading_bot.models.db_models import MarketSnapshot, SignalRecord
+from core.database import get_session
+from core.logger import get_logger
+from models.db_models import MarketSnapshot, SignalRecord
 
 if TYPE_CHECKING:
-    from trading_bot.core.config import TradingConfig
-    from trading_bot.execution.position_watcher import PositionWatcher
-    from trading_bot.strategies.base_strategy import Signal
+    from core.config import TradingConfig
+    from execution.position_watcher import PositionWatcher
+    from strategies.base_strategy import Signal
 
 logger = get_logger(__name__)
 

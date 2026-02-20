@@ -15,14 +15,14 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Dict
 
-from trading_bot.core.database import get_session
-from trading_bot.core.logger import get_logger
-from trading_bot.models.db_models import TradeRecord
+from core.database import get_session
+from core.logger import get_logger
+from models.db_models import TradeRecord
 
 if TYPE_CHECKING:
-    from trading_bot.core.config import TradingConfig
-    from trading_bot.data.memory_store import MemoryStore
-    from trading_bot.strategies.base_strategy import Signal
+    from core.config import TradingConfig
+    from data.memory_store import MemoryStore
+    from strategies.base_strategy import Signal
 
 logger = get_logger(__name__)
 

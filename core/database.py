@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from trading_bot.core.logger import get_logger
+from core.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -34,7 +34,7 @@ async def init_db(db_url: str) -> None:
     _session_factory = async_sessionmaker(_engine, expire_on_commit=False)
 
     # Tabloları oluştur (models import edilerek Base.metadata alınır)
-    from trading_bot.models.db_models import Base  # noqa: F811
+    from models.db_models import Base  # noqa: F811
 
     async with _engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
