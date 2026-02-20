@@ -29,6 +29,7 @@ from core.config import TradingConfig
 from core.database import close_db, init_db
 from core.logger import get_logger, setup_logging
 from data.memory_store import MemoryStore
+from data.rest_client import preload_history
 from data.websocket_client import BinanceWebSocketClient
 from execution.position_watcher import PositionWatcher
 from execution.signal_dispatcher import SignalDispatcher
@@ -39,7 +40,7 @@ logger = get_logger(__name__)
 
 # ── Sembol Listesi Çekme (Public REST) ────────────────────────────────
 
-async def fetch_active_symbols(limit: int = 700) -> list[str]:
+async def fetch_active_symbols(limit: int = 100) -> list[str]:
     """
     Binance Futures'tan halka açık endpoint ile aktif USDT
     perpetual sembollerini çeker. API Key gerektirmez.
@@ -80,11 +81,6 @@ async def strategy_scan_loop(
     Sinyal bulunursa dispatcher aracılığıyla Telegram + DB + Watcher'a gönderir.
     """
     logger.info("scan_loop_started", interval_sec=config.scan_interval_seconds)
-
-    # İlk taramadan önce WebSocket'in veri toplamasını bekle
-    warmup_seconds = 90
-    logger.info("warmup_waiting", seconds=warmup_seconds)
-    await asyncio.sleep(warmup_seconds)
 
     while True:
         try:
@@ -190,10 +186,14 @@ async def main() -> None:
     # Telegram callback'i watcher'a bağla
     watcher._on_close = dispatcher.send_notification
 
-    # 7. WebSocket istemcisi (public Kline + Mark Price)
+    # 7. Geçmiş veriyi çek (Cold Start çözümü)
+    # 1m verilerini REST'ten çeker ve 5m'e resample ederek store'u doldurur.
+    await preload_history(symbols, store, limit=500)
+
+    # 8. WebSocket istemcisi (public Kline + Mark Price)
     ws_client = BinanceWebSocketClient(config, store, symbols)
 
-    # 8. Strateji
+    # 9. Strateji
     strategy = EmaVolumeStrategy(config, store)
 
     # Başlangıç bildirimi
