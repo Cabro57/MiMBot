@@ -39,7 +39,7 @@ logger = get_logger(__name__)
 
 # ── Sembol Listesi Çekme (Public REST) ────────────────────────────────
 
-async def fetch_active_symbols(limit: int = 100) -> list[str]:
+async def fetch_active_symbols(limit: int = 700) -> list[str]:
     """
     Binance Futures'tan halka açık endpoint ile aktif USDT
     perpetual sembollerini çeker. API Key gerektirmez.

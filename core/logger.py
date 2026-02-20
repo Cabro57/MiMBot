@@ -18,7 +18,7 @@ _configured = False
 
 
 def setup_logging(log_level: str = "INFO", log_file: str | None = "trading_bot.log") -> None:
-    """Loglama altyapısını bir kez yapılandırır. İkinci çağrıda hiçbir şey yapmaz."""
+    """Loglama altyapısını yapılandırır: Konsol (Renkli/Okunabilir), Dosya (JSON)."""
     global _configured
     if _configured:
         return
@@ -26,43 +26,69 @@ def setup_logging(log_level: str = "INFO", log_file: str | None = "trading_bot.l
 
     level = getattr(logging, log_level.upper(), logging.INFO)
 
-    # ── stdlib handler'ları ────────────────────────────────────────────
-    handlers: list[logging.Handler] = [logging.StreamHandler(sys.stdout)]
-    if log_file:
-        log_path = Path(log_file)
-        handlers.append(logging.FileHandler(str(log_path), encoding="utf-8"))
+    shared_processors = [
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.add_log_level,
+        structlog.stdlib.add_logger_name,
+        structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M:%S", utc=False),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+    ]
 
+    # ── ProcessorFormatter ile farklı çıktı formatları ───────────────────
+    
+    # 1. Konsol için renklendirilmiş çıktı
+    console_formatter = structlog.stdlib.ProcessorFormatter(
+        foreign_pre_chain=shared_processors,
+        processors=[
+            structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+            structlog.dev.ConsoleRenderer(colors=True),
+        ],
+    )
+
+    # 2. Dosya için JSON çıktı
+    file_formatter = structlog.stdlib.ProcessorFormatter(
+        foreign_pre_chain=shared_processors,
+        processors=[
+            structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+            structlog.processors.JSONRenderer(ensure_ascii=False),
+        ],
+    )
+
+    # ── Handler Yapılandırması ──────────────────────────────────────────
+    handlers: list[logging.Handler] = []
+
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(console_formatter)
+    handlers.append(console_handler)
+
+    if log_file:
+        file_handler = logging.FileHandler(str(Path(log_file)), encoding="utf-8")
+        file_handler.setFormatter(file_formatter)
+        handlers.append(file_handler)
+
+    # Root logger yapılandırması
     logging.basicConfig(
-        format="%(message)s",
         level=level,
         handlers=handlers,
         force=True,
     )
 
-    # ── structlog yapılandırması ───────────────────────────────────────
+    # ── Structlog'u stdlib ile konuştur ────────────────────────────────
     structlog.configure(
-        processors=[
-            structlog.contextvars.merge_contextvars,
-            structlog.processors.add_log_level,
-            structlog.processors.TimeStamper(fmt="iso"),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
-            structlog.processors.JSONRenderer(ensure_ascii=False),
+        processors=shared_processors + [
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
         ],
-        wrapper_class=structlog.make_filtering_bound_logger(level),
-        context_class=dict,
-        logger_factory=structlog.PrintLoggerFactory(),
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        wrapper_class=structlog.stdlib.BoundLogger,
         cache_logger_on_first_use=True,
     )
 
+    # Diğer kütüphanelerin loglarını sessize al (isteğe bağlı)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("apscheduler").setLevel(logging.WARNING)
+
 
 def get_logger(name: str) -> structlog.stdlib.BoundLogger:
-    """
-    Modül bazlı logger üretir.
-
-    Kullanım:
-        from core.logger import get_logger
-        logger = get_logger(__name__)
-        logger.info("mesaj", extra_key="değer")
-    """
+    """Modül bazlı logger üretir."""
     return structlog.get_logger(name)
