@@ -13,7 +13,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Proje kök dizinindeki .env dosyasını yükle
-_env_path = Path(__file__).resolve().parents[2] / ".env"
+_env_path = Path(__file__).resolve().parents[1] / ".env"
 load_dotenv(_env_path, override=False)
 
 
