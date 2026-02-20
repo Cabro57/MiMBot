@@ -1,0 +1,22 @@
+# AstarBot v5.0 — Bağımlılıklar
+# pip install -r requirements.txt
+
+# Async HTTP & WebSocket
+aiohttp>=3.9.0
+websockets>=12.0
+
+# Telegram
+python-telegram-bot>=21.0
+
+# Hesaplama (Pandas yerine)
+numpy>=1.26.0
+
+# Yapılandırılmış Loglama
+structlog>=24.0.0
+
+# Ortam Değişkenleri
+python-dotenv>=1.0.0
+
+# Veritabanı (Async SQLite)
+sqlalchemy>=2.0.0
+aiosqlite>=0.20.0
