@@ -12,6 +12,17 @@ import sys
 from pathlib import Path
 
 import structlog
+import numpy as np
+
+
+def numpy_sanitizer(logger, method_name, event_dict):
+    """NumPy tiplerini (np.float64, np.int64 vb.) standart Python tiplerine dönüştürür."""
+    for key, value in event_dict.items():
+        if isinstance(value, (np.floating, np.integer)):
+            event_dict[key] = value.item()
+        elif isinstance(value, np.ndarray):
+            event_dict[key] = value.tolist()
+    return event_dict
 
 
 _configured = False
@@ -27,6 +38,7 @@ def setup_logging(log_level: str = "INFO", log_file: str | None = "trading_bot.l
     level = getattr(logging, log_level.upper(), logging.INFO)
 
     shared_processors = [
+        numpy_sanitizer,
         structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
         structlog.stdlib.add_logger_name,
