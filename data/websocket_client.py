@@ -49,10 +49,12 @@ class BinanceWebSocketClient:
         config: TradingConfig,
         store: MemoryStore,
         symbols: list[str],
+        timeframes: list[str] | None = None,
     ) -> None:
         self._config = config
         self._store = store
         self._symbols = [s.replace("/", "").lower() for s in symbols]
+        self._timeframes = timeframes or config.ws_kline_timeframes
         self._running = False
         self._tasks: list[asyncio.Task] = []
 
@@ -110,7 +112,7 @@ class BinanceWebSocketClient:
         """Çoklu sembol + çoklu timeframe combined stream URL'si oluşturur."""
         streams: list[str] = []
         for sym in self._symbols:
-            for tf in self._config.ws_kline_timeframes:
+            for tf in self._timeframes:
                 streams.append(f"{sym}@kline_{tf}")
         # Binance 200 stream limiti var; gerekirse chunk'lanabilir
         return f"{_WS_BASE}/stream?streams={'/'.join(streams[:200])}"

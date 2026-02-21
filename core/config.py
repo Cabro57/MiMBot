@@ -61,8 +61,8 @@ class TradingConfig:
     time_stop_hours: int = field(default_factory=lambda: _env_int("TIME_STOP_HOURS", 4))
     cooldown_minutes: int = field(default_factory=lambda: _env_int("COOLDOWN_MINUTES", 30))
 
-
     # ── Sistem ────────────────────────────────────────────────────────
+    active_strategy: str = field(default_factory=lambda: _env("ACTIVE_STRATEGY", "ema_volume_strategy.EmaVolumeStrategy"))
     max_parallel_tasks: int = field(default_factory=lambda: _env_int("MAX_PARALLEL_TASKS", 15))
     db_url: str = field(default_factory=lambda: _env("DB_URL", "sqlite+aiosqlite:///trading_bot.db"))
     log_level: str = field(default_factory=lambda: _env("LOG_LEVEL", "INFO"))

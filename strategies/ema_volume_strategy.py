@@ -58,6 +58,8 @@ class EmaVolumeStrategy(BaseStrategy):
     Tüm parametreler TradingConfig'den dinamik olarak okunur.
     """
 
+    REQUIRED_TIMEFRAMES: list[str] = ["1m", "5m"]
+
     def __init__(self, config: TradingConfig, store: MemoryStore) -> None:
         super().__init__(config, store)
 

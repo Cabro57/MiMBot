@@ -45,6 +45,8 @@ class BaseStrategy(ABC):
     REST API çağrısı YAPMAZ.
     """
 
+    REQUIRED_TIMEFRAMES: list[str] = []
+
     def __init__(self, config: TradingConfig, store: MemoryStore) -> None:
         self._config = config
         self._store = store

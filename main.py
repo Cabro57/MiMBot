@@ -33,7 +33,8 @@ from data.rest_client import preload_history
 from data.websocket_client import BinanceWebSocketClient
 from execution.position_watcher import PositionWatcher
 from execution.signal_dispatcher import SignalDispatcher
-from strategies.ema_volume_strategy import EmaVolumeStrategy
+from strategies.base_strategy import BaseStrategy
+from strategies.loader import load_strategy
 
 logger = get_logger(__name__)
 
@@ -70,7 +71,7 @@ async def fetch_active_symbols(limit: int = 100) -> list[str]:
 
 async def strategy_scan_loop(
     config: TradingConfig,
-    strategy: EmaVolumeStrategy,
+    strategy: BaseStrategy,
     dispatcher: SignalDispatcher,
     watcher: PositionWatcher,
     store: MemoryStore,
@@ -202,15 +203,15 @@ async def main() -> None:
     # Telegram callback'i watcher'a bağla
     watcher._on_close = dispatcher.send_notification
 
-    # 7. Geçmiş veriyi çek (Cold Start çözümü)
-    # 1m verilerini REST'ten çeker ve 5m'e resample ederek store'u doldurur.
-    await preload_history(symbols, store, limit=250)
+    # 7. Strateji (dinamik yükleme)
+    strategy = load_strategy(config, store)
+    required_tfs = strategy.REQUIRED_TIMEFRAMES
 
-    # 8. WebSocket istemcisi (public Kline + Mark Price)
-    ws_client = BinanceWebSocketClient(config, store, symbols)
+    # 8. Geçmiş veriyi çek (Cold Start çözümü)
+    await preload_history(symbols, store, timeframes=required_tfs, limit=250)
 
-    # 9. Strateji
-    strategy = EmaVolumeStrategy(config, store)
+    # 9. WebSocket istemcisi (public Kline + Mark Price)
+    ws_client = BinanceWebSocketClient(config, store, symbols, timeframes=required_tfs)
 
     # Başlangıç bildirimi
     await dispatcher.send_notification(
