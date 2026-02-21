@@ -120,25 +120,31 @@ class EmaVolumeStrategy(BaseStrategy):
         if side is None:
             return None
 
-        # ── TP / SL hesaplama ─────────────────────────────────────────
+        # ── Canlı giriş fiyatı (Mark Price) ──────────────────────────
+        live_price = await self._store.get_price(symbol)
+        entry_price = float(live_price) if live_price is not None else float(last_close)
+
+        # ── TP / SL hesaplama (entry_price bazlı) ────────────────────
         if side == "LONG":
             sl = max(
                 r_low * (1 - cfg.stop_offset),
-                last_close * (1 - cfg.max_stop_percent),
+                entry_price * (1 - cfg.max_stop_percent),
             )
-            tp = last_close + (last_close - sl) * cfg.rr_ratio
+            risk = entry_price - sl
+            tp = entry_price + risk * cfg.rr_ratio
         else:
             sl = min(
                 r_high * (1 + cfg.stop_offset),
-                last_close * (1 + cfg.max_stop_percent),
+                entry_price * (1 + cfg.max_stop_percent),
             )
-            tp = last_close - (sl - last_close) * cfg.rr_ratio
+            risk = sl - entry_price
+            tp = entry_price - risk * cfg.rr_ratio
 
         # ── Sinyal üret ───────────────────────────────────────────────
         signal = Signal(
             symbol=symbol,
             side=side,
-            entry_price=round(last_close, 6),
+            entry_price=round(entry_price, 6),
             sl_price=round(sl, 6),
             tp_price=round(tp, 6),
             spike_ratio=round(spike_ratio, 4),

@@ -21,7 +21,7 @@ import asyncio
 import platform
 import signal as os_signal
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import aiohttp
 
@@ -82,14 +82,28 @@ async def strategy_scan_loop(
     """
     logger.info("scan_loop_started", interval_sec=config.scan_interval_seconds)
 
+    # Cooldown sözlüğü: {symbol: son_sinyal_zamanı}
+    cooldowns: dict[str, datetime] = {}
+    cooldown_delta = timedelta(minutes=config.cooldown_minutes)
+
     while True:
         try:
             scan_start = datetime.now(timezone.utc)
             tracked = watcher.tracked_symbols
 
-            # Takip edilmeyen sembolleri tara
-            candidates = [s for s in symbols if s not in tracked]
-            logger.info("scan_cycle_start", total=len(candidates), tracked=len(tracked))
+            # Cooldown filtresi: son N dakikada sinyal üretilen sembolleri çıkar
+            now = datetime.now(timezone.utc)
+            candidates = [
+                s for s in symbols
+                if s not in tracked
+                and (s not in cooldowns or (now - cooldowns[s]) >= cooldown_delta)
+            ]
+            logger.info(
+                "scan_cycle_start",
+                total=len(candidates),
+                tracked=len(tracked),
+                cooled=len(symbols) - len(candidates) - len(tracked),
+            )
 
             # Paralel değerlendirme (semaphore ile sınırlandırılmış)
             semaphore = asyncio.Semaphore(config.max_parallel_tasks)
@@ -123,6 +137,8 @@ async def strategy_scan_loop(
 
                 for sig in top_signals:
                     await dispatcher.dispatch(sig)
+                    # Cooldown başlat
+                    cooldowns[sig.symbol] = datetime.now(timezone.utc)
 
             await asyncio.sleep(config.scan_interval_seconds)
 
@@ -188,7 +204,7 @@ async def main() -> None:
 
     # 7. Geçmiş veriyi çek (Cold Start çözümü)
     # 1m verilerini REST'ten çeker ve 5m'e resample ederek store'u doldurur.
-    await preload_history(symbols, store, limit=500)
+    await preload_history(symbols, store, limit=250)
 
     # 8. WebSocket istemcisi (public Kline + Mark Price)
     ws_client = BinanceWebSocketClient(config, store, symbols)

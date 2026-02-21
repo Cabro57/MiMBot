@@ -59,6 +59,8 @@ class TradingConfig:
     max_stop_percent: float = field(default_factory=lambda: _env_float("MAX_STOP_PERCENT", 0.025))
     stop_offset: float = field(default_factory=lambda: _env_float("STOP_OFFSET", 0.0005))
     time_stop_hours: int = field(default_factory=lambda: _env_int("TIME_STOP_HOURS", 4))
+    cooldown_minutes: int = field(default_factory=lambda: _env_int("COOLDOWN_MINUTES", 30))
+
 
     # ── Sistem ────────────────────────────────────────────────────────
     max_parallel_tasks: int = field(default_factory=lambda: _env_int("MAX_PARALLEL_TASKS", 15))
