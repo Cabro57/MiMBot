@@ -69,6 +69,14 @@ class SignalDispatcher:
                 symbol=signal.symbol,
                 side=signal.side,
                 signal_id=signal_id,
+                entry=signal.entry_price,
+                sl=signal.sl_price,
+                tp=signal.tp_price,
+                spike_ratio=signal.spike_ratio,
+                ema_fast=signal.ema_fast_value,
+                ema_slow=signal.ema_slow_value,
+                volume=signal.current_volume,
+                avg_vol=signal.avg_volume,
             )
 
         except Exception as e:
